@@ -355,12 +355,10 @@ from sys import platform
 from os import environ
 from functools import wraps, partial
 from kivy.context import register_context
-from kivy.weakmethod import WeakMethod
 from kivy.config import Config
 from kivy.logger import Logger
 from kivy.compat import clock as _default_time, PY2
 import time
-from threading import Lock
 from kivy._clock import CyClockBase, ClockEvent, FreeClockEvent, \
     CyClockBaseFree
 try:
@@ -374,6 +372,8 @@ from threading import Event as ThreadingEvent
 
 def _get_sleep_obj():
     pass
+
+
 try:
     import ctypes
     if platform in ('win32', 'cygwin'):
@@ -613,7 +613,9 @@ class ClockBaseBehavior(object):
 
     time = staticmethod(partial(_default_time))
 
-ClockBaseBehavior.time.__doc__ = '''Proxy method for :func:`~kivy.compat.clock`. '''
+
+ClockBaseBehavior.time.__doc__ = \
+    '''Proxy method for :func:`~kivy.compat.clock`. '''
 
 
 class ClockBaseInterruptBehavior(ClockBaseBehavior):
@@ -640,10 +642,10 @@ class ClockBaseInterruptBehavior(ClockBaseBehavior):
             return
 
         if not event.timeout or (
-                not self.interupt_next_only and event.timeout
-                <= 1 / fps  # remaining time
-                - (self.time() - self._last_tick)  # elapsed time
-                + 4 / 5. * self.get_resolution()):  # resolution fudge factor
+                not self.interupt_next_only and event.timeout <=
+                1 / fps -  # remaining time
+                (self.time() - self._last_tick) +  # elapsed time
+                4 / 5. * self.get_resolution()):  # resolution fudge factor
             self._event.set()
 
     def idle(self):
@@ -737,15 +739,15 @@ class ClockBaseFreeInterruptOnly(
 
     def idle(self):
         fps = self._max_fps
+        current = self.time()
+        event = self._event
         if fps > 0:
-            event = self._event
             min_sleep = self.get_resolution()
             usleep = self.usleep
             undershoot = 4 / 5. * min_sleep
             min_t = self.get_min_free_timeout
             interupt_next_only = self.interupt_next_only
 
-            current = self.time()
             sleeptime = 1 / fps - (current - self._last_tick)
             while sleeptime - undershoot > min_sleep:
                 if event.is_set():
@@ -799,6 +801,7 @@ def mainthread(func):
             func(*args, **kwargs)
         Clock.schedule_once(callback_func, 0)
     return delayed_func
+
 
 if 'KIVY_DOC_INCLUDE' in environ:
     #: Instance of :class:`ClockBaseBehavior`.
