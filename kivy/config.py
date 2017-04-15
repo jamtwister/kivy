@@ -54,7 +54,8 @@ For information on configuring your :class:`~kivy.app.App`, please see the
 Available configuration tokens
 ------------------------------
 
-.. |log_levels| replace:: 'debug', 'info', 'warning', 'error' or 'critical'
+.. |log_levels| replace::
+    'trace', 'debug', 'info', 'warning', 'error' or 'critical'
 
 :kivy:
 
@@ -89,6 +90,15 @@ Available configuration tokens
         Set the minimum log level to use.
     `log_name`: string
         Format string to use for the filename of log file.
+
+    `log_maxfiles`: int
+        Keep log_maxfiles recent logfiles while purging the log directory. Set
+        'log_maxfiles' to -1 to disable logfile purging (eg keep all logfiles).
+
+        .. note::
+            You end up with 'log_maxfiles + 1' logfiles because the logger
+            adds a new one after purging.
+
     `window_icon`: string
         Path of the window icon. Use this if you want to replace the default
         pygame icon.
@@ -271,7 +281,7 @@ Available configuration tokens
     Check the specific module's documentation for a list of accepted
     arguments.
 
-.. versionchanged:: 1.9.2
+.. versionchanged:: 1.10.0
     `min_state_time`  and `allow_screensaver` have been added
     to the `graphics` section.
     `kivy_clock` has been added to the kivy section.
@@ -322,7 +332,7 @@ from weakref import ref
 _is_rpi = exists('/opt/vc/include/bcm_host.h')
 
 # Version number of current configuration format
-KIVY_CONFIG_VERSION = 18
+KIVY_CONFIG_VERSION = 19
 
 Config = None
 '''The default Kivy configuration object. This is a :class:`ConfigParser`
@@ -825,6 +835,9 @@ if not environ.get('KIVY_DOC_INCLUDE'):
 
         elif version == 17:
             Config.setdefault('graphics', 'allow_screensaver', '1')
+
+        elif version == 18:
+            Config.setdefault('kivy', 'log_maxfiles', '100')
 
         # elif version == 1:
         #    # add here the command for upgrading from configuration 0 to 1
